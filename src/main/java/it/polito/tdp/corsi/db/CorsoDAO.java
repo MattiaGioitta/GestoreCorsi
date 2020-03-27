@@ -9,33 +9,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.polito.tdp.corsi.model.Corso;
+import it.tdp.polito.corsi.model.Corso;
 
 public class CorsoDAO {
 	
 	public List<Corso> getCorsiByPeriodo(Integer pd){
-		
-		String sql = "select * from corso where pd = ?";
-		List<Corso> result = new ArrayList<Corso>();
+		String sql = "SELECT * FROM corso WHERE pd=?";
+		List<Corso> lista = new ArrayList<Corso>();
 		
 		try {
 			Connection conn = ConnectDB.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
 			st.setInt(1, pd);
+			
 			ResultSet rs = st.executeQuery();
 			
 			while(rs.next()) {
-				Corso c = new Corso(rs.getString("codins"), rs.getInt("crediti"), rs.getString("nome"), rs.getInt("pd"));
-				result.add(c);
+				Corso c = new Corso(rs.getString("codins"), rs.getInt("crediti"),rs.getString("nome"), rs.getInt("pd"));
+				lista.add(c);
 			}
 			
+			st.close();
 			conn.close();
 			
-		} catch(SQLException e) {
-			throw new RuntimeException(e);
+		}catch(SQLException e) {
+			throw new RuntimeException();
+			
 		}
-		
-		return result;
+		return lista;
 		
 	}
 	
