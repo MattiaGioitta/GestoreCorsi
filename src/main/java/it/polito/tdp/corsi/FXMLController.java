@@ -11,6 +11,7 @@ import java.util.ResourceBundle;
 
 import it.tdp.polito.corsi.model.Corso;
 import it.tdp.polito.corsi.model.Model;
+import it.tdp.polito.corsi.model.Studente;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -76,7 +77,26 @@ public class FXMLController {
 
     @FXML
     void StampaDivisione(ActionEvent event) {
+    	this.txtRisultato.clear();
+    	/*
+    	 * dato un corso ci aspettiamo una divisione del genere
+    	 * elenco corso di studi es. informatica 12
+    	 * gestionali 23
+    	 */
+    	String codins = this.TxtCorso.getText();
+    	// Controllare se un codic corrisponde a quello di 
+    	// un corso preesistente
+    	if(!this.model.esisteCorso(codins)) {
+    		this.txtRisultato.appendText("Il corso non esiste!");
+    		return;
+    	}
+    	Corso c = new Corso(codins, 0,null,0);
 
+    	Map<String,Integer> stat = this.model.getDivisioneCDS(c);
+    	for(String cds : stat.keySet()) {
+    		this.txtRisultato.appendText(cds+" "+stat.get(cds)+"\n");
+    		
+    	}
     }
 
     @FXML
@@ -106,6 +126,23 @@ this.txtRisultato.clear();
 
     @FXML
     void StampaStudenti(ActionEvent event) {
+    	String codins = this.TxtCorso.getText();
+    	// Controllare se un codic corrisponde a quello di 
+    	// un corso preesistente
+    	if(!this.model.esisteCorso(codins)) {
+    		this.txtRisultato.appendText("Il corso non esiste!");
+    		return;
+    	}
+    	Corso c = new Corso(codins, 0,null,0);
+    	List<Studente> studenti = this.model.getStudentiByCorso(c);
+    	if(studenti.size()==0) {
+    		this.txtRisultato.appendText("Non ci sono studenti");
+    		return;
+    	}
+    	for(Studente s : studenti) {
+    		this.txtRisultato.appendText(s.toString()+"\n");
+    	}
+    	
 
     }
     

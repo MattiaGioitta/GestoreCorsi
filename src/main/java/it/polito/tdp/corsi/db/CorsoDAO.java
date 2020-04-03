@@ -6,12 +6,38 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import it.tdp.polito.corsi.model.Corso;
+import it.tdp.polito.corsi.model.Studente;
 
 public class CorsoDAO {
+	
+	public boolean esisteCorso(String codins) {
+		String sql = "SELECT * FROM corso WHERE codins=?";
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, codins);			
+			ResultSet rs = st.executeQuery();
+			if(rs.next()) {
+				conn.close();
+				return true;
+			}
+			conn.close();
+			return false;
+			
+			
+			
+		}catch(SQLException e) {
+			throw new RuntimeException();
+			
+		}
+	}
+	
+	
 	
 	public List<Corso> getCorsiByPeriodo(Integer pd){
 		String sql = "SELECT * FROM corso WHERE pd=?";
@@ -69,4 +95,61 @@ public class CorsoDAO {
 	}
 	
 
+	public List<Studente> getStudentiByCorso(Corso c ){
+		List<Studente> studenti = new LinkedList<Studente>();
+		
+		String sql ="select s.matricola, s.nome, s.cognome, s.CDS " + 
+				"from studente as s, iscrizione as i " + 
+				"where s.matricola = i.matricola and i.codins = ?";
+
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, c.getCodins());
+			ResultSet rs = st.executeQuery();
+			
+			while(rs.next()) {
+				Studente s = new Studente(rs.getInt("matricola"), rs.getString("nome"), rs.getString("cognome"), rs.getString("CDS"));
+				studenti.add(s);
+				
+			}
+			
+			conn.close();
+			
+		} catch(SQLException e) {
+			throw new RuntimeException(e);
+		}
+		
+	return studenti;
+	
+	
+	}
+	
+	public Map<String,Integer> getDivisioneCDS(Corso c){
+		String sql ="select s.CDS, COUNT(*) as tot " + 
+				"from studente as s, iscrizione as i " + 
+				"where s.matricola = i.matricola and s.cds <> \"\" and i.codins = ? " + 
+				"group by s.CDS";
+		Map<String,Integer> stat = new HashMap<String,Integer>();
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, c.getCodins());
+			ResultSet rs = st.executeQuery();
+			while(rs.next()) {
+				stat.put(rs.getString("CDS"), rs.getInt("tot"));
+			}
+			conn.close();
+			
+		}catch(SQLException e) {
+			throw new RuntimeException(e);
+			
+		}
+		
+		return stat;
+	}
+	
+
+	
+	
 }
